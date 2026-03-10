@@ -29,4 +29,8 @@ app.use("/api/testimonials", testimonialsRoutes);
 
 app.get("/", (req, res) => res.json({ message: "API working 🚀" }));
 
+app.get("/health", (req, res) =>
+  res.json({ status: "ok", uptime: process.uptime(), timestamp: new Date() }),
+);
+
 export default app;
