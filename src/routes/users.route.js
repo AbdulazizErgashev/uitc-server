@@ -4,9 +4,9 @@ import {
   getUser,
   updateUser,
   deleteUser,
-} from "../controllers/users.js";
-import { authMiddleware } from "../middleware/auth.js";
-import { adminMiddleware } from "../middleware/role.js";
+} from "../controllers/users.controller.js";
+import { authMiddleware } from "../middlewares/auth.js";
+import { adminMiddleware } from "../middlewares/role.js";
 
 const router = express.Router();
 
