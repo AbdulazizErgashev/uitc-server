@@ -88,7 +88,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 
 // Delete user
 export const deleteUser = asyncHandler(async (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = req.params.id;
 
   await prisma.user.delete({
     where: { id },
