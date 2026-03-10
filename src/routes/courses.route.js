@@ -5,9 +5,9 @@ import {
   createCourse,
   updateCourse,
   deleteCourse,
-} from "../controllers/courses.js";
-import { authMiddleware } from "../middleware/auth.js";
-import { adminMiddleware } from "../middleware/role.js";
+} from "../controllers/courses.controller.js";
+import { authMiddleware } from "../middlewares/auth.js";
+import { adminMiddleware } from "../middlewares/role.js";
 
 const router = express.Router();
 
