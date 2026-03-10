@@ -6,9 +6,9 @@ import dotenv from "dotenv";
 
 import authRoutes from "./routes/auth.route.js";
 import usersRoutes from "./routes/users.route.js";
-import coursesRoutes from "./routes/courses.js";
-import companiesRoutes from "./routes/companies.js";
-import testimonialsRoutes from "./routes/testimonials.js";
+import coursesRoutes from "./routes/courses.route.js";
+import companiesRoutes from "./routes/companies.route.js";
+import testimonialsRoutes from "./routes/testimonials.route.js";
 
 dotenv.config();
 
