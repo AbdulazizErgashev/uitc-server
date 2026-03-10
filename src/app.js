@@ -9,6 +9,7 @@ import usersRoutes from "./routes/users.route.js";
 import coursesRoutes from "./routes/courses.route.js";
 import companiesRoutes from "./routes/companies.route.js";
 import testimonialsRoutes from "./routes/testimonials.route.js";
+import { errorHandler } from "./middlewares/error.js";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(cors());
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(errorHandler);
 
 // Routes
 app.use("/api/auth", authRoutes);

@@ -1,81 +1,101 @@
 import { prisma } from "../../prisma/prisma.js";
 import bcrypt from "bcrypt";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 // Get all users
-export const getUsers = async (req, res) => {
-  try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        full_name: true,
-        email: true,
-        role: true,
-        created_at: true,
-      },
-    });
-    res.json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const getUsers = asyncHandler(async (req, res) => {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      full_name: true,
+      email: true,
+      role: true,
+      created_at: true,
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+
+  res.json({
+    success: true,
+    count: users.length,
+    data: users,
+  });
+});
 
 // Get single user
-export const getUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        full_name: true,
-        email: true,
-        role: true,
-        created_at: true,
-      },
+export const getUser = asyncHandler(async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      full_name: true,
+      email: true,
+      role: true,
+      created_at: true,
+    },
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
     });
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
   }
-};
+
+  res.json({
+    success: true,
+    data: user,
+  });
+});
 
 // Update user
-export const updateUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { full_name, email, password, role } = req.body;
+export const updateUser = asyncHandler(async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { full_name, email, password, role } = req.body;
 
-    const data = { full_name, email, role };
-    if (password) {
-      data.password = await bcrypt.hash(password, 10);
-    }
+  const data = {};
 
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data,
-      select: { id: true, full_name: true, email: true, role: true },
-    });
+  if (full_name) data.full_name = full_name;
+  if (email) data.email = email;
+  if (role) data.role = role;
 
-    res.json(updatedUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+  if (password) {
+    data.password = await bcrypt.hash(password, 10);
   }
-};
+
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data,
+    select: {
+      id: true,
+      full_name: true,
+      email: true,
+      role: true,
+      created_at: true,
+    },
+  });
+
+  res.json({
+    success: true,
+    message: "User updated successfully",
+    data: updatedUser,
+  });
+});
 
 // Delete user
-export const deleteUser = async (req, res) => {
-  try {
-    const { id } = req.params;
+export const deleteUser = asyncHandler(async (req, res) => {
+  const id = parseInt(req.params.id);
 
-    await prisma.user.delete({ where: { id } });
+  await prisma.user.delete({
+    where: { id },
+  });
 
-    res.json({ message: "User deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+  res.json({
+    success: true,
+    message: "User deleted successfully",
+  });
+});
