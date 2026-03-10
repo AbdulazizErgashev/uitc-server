@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String      @id @default(uuid())
+  full_name  String
+  email      String      @unique
+  password   String
+  role       Role
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  testimonials Testimonial[]
+  likes       Like[]
+  bookmarks   Bookmark[]
+  comments    Comment[]
+}
+
+enum Role {
+  admin
+  teacher
+  student
+}
+
+model Course {
+  id         String       @id @default(uuid())
+  name       String
+  description String?
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  testimonials Testimonial[]
+}
+
+model Company {
+  id         String       @id @default(uuid())
+  name       String
+  color      String?
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  testimonials Testimonial[]
+}
+
+model Testimonial {
+  id           String     @id @default(uuid())
+  user         User       @relation(fields: [user_id], references: [id])
+  user_id      String
+  course       Course     @relation(fields: [course_id], references: [id])
+  course_id    String
+  company      Company    @relation(fields: [company_id], references: [id])
+  company_id   String
+  name         String
+  role         String
+  quote        String
+  long_quote   String?
+  rating       Float
+  date         DateTime
+  video_url    String?
+  likes_count  Int        @default(0)
+  shares_count Int        @default(0)
+  comments_count Int      @default(0)
+  location     String?
+  experience   String?
+  achievement  String?
+  verified     Boolean    @default(false)
+  featured     Boolean    @default(false)
+  tags         String[]
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  likes        Like[]
+  bookmarks    Bookmark[]
+  comments     Comment[]
+}
+
+model Like {
+  id            String      @id @default(uuid())
+  user          User        @relation(fields: [user_id], references: [id])
+  user_id       String
+  testimonial   Testimonial @relation(fields: [testimonial_id], references: [id])
+  testimonial_id String
+  created_at    DateTime    @default(now())
+}
+
+model Bookmark {
+  id            String      @id @default(uuid())
+  user          User        @relation(fields: [user_id], references: [id])
+  user_id       String
+  testimonial   Testimonial @relation(fields: [testimonial_id], references: [id])
+  testimonial_id String
+  created_at    DateTime    @default(now())
+}
+
+model Comment {
+  id            String      @id @default(uuid())
+  user          User        @relation(fields: [user_id], references: [id])
+  user_id       String
+  testimonial   Testimonial @relation(fields: [testimonial_id], references: [id])
+  testimonial_id String
+  text          String
+  created_at    DateTime    @default(now())
+}
