@@ -37,11 +37,16 @@ model Course {
 }
 
 model Company {
-  id         String       @id @default(uuid())
-  name       String
-  color      String?
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
+  id           String        @id @default(uuid())
+  name         String
+  color        String?
+  logo_url     String?
+  website      String?
+  description  String?
+
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+
   testimonials Testimonial[]
 }
 
