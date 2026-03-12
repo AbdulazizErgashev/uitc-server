@@ -12,6 +12,7 @@ import {
   adminLoginSchema,
   adminUpdateSchema,
 } from "../validators/adminAuth.validator.js";
+import { logout } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
@@ -29,5 +30,8 @@ router.get("/me", me);
 
 // Update phone & password
 router.patch("/update", validate(adminUpdateSchema), update);
+
+// Logout
+router.post("/logout", logout);
 
 export default router;

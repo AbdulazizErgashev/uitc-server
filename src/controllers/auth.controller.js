@@ -46,3 +46,10 @@ export const update = asyncHandler(async (req, res) => {
     errorResponse(res, error.message, 400);
   }
 });
+
+// Logout
+export const logout = asyncHandler(async (req, res) => {
+  // JWT stateless, shuning uchun serverda tokenni o'chirish shart emas
+  // Frontend tokenni localStorage yoki cookie-dan o'chiradi
+  successResponse(res, null, "Logged out successfully");
+});
