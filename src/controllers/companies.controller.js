@@ -1,66 +1,39 @@
-import { prisma } from "../../prisma/prisma.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { successResponse } from "../utils/apiResponse.js";
+import {
+  getAllCompanies,
+  getCompanyById,
+  createCompanyService,
+  updateCompanyService,
+  deleteCompanyService,
+} from "../services/companies.service.js";
 
 // Get all companies
-export const getCompanies = async (req, res) => {
-  try {
-    const companies = await prisma.company.findMany();
-    res.json(companies);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const getCompanies = asyncHandler(async (req, res) => {
+  const companies = await getAllCompanies();
+  successResponse(res, companies, "Companies fetched successfully");
+});
 
 // Get single company
-export const getCompany = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const company = await prisma.company.findUnique({ where: { id } });
-    if (!company) return res.status(404).json({ message: "Company not found" });
-    res.json(company);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const getCompany = asyncHandler(async (req, res) => {
+  const company = await getCompanyById(req.params.id);
+  successResponse(res, company, "Company fetched successfully");
+});
 
 // Create company
-export const createCompany = async (req, res) => {
-  try {
-    const { name, color } = req.body;
-    const company = await prisma.company.create({ data: { name, color } });
-    res.status(201).json(company);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const createCompany = asyncHandler(async (req, res) => {
+  const company = await createCompanyService(req.body);
+  successResponse(res, company, "Company created successfully");
+});
 
 // Update company
-export const updateCompany = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, color } = req.body;
-
-    const updatedCompany = await prisma.company.update({
-      where: { id },
-      data: { name, color },
-    });
-    res.json(updatedCompany);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const updateCompany = asyncHandler(async (req, res) => {
+  const company = await updateCompanyService(req.params.id, req.body);
+  successResponse(res, company, "Company updated successfully");
+});
 
 // Delete company
-export const deleteCompany = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await prisma.company.delete({ where: { id } });
-    res.json({ message: "Company deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const deleteCompany = asyncHandler(async (req, res) => {
+  await deleteCompanyService(req.params.id);
+  successResponse(res, null, "Company deleted successfully");
+});
