@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   getTestimonials,
   getTestimonial,
@@ -14,29 +15,62 @@ import {
 
 import { authMiddleware } from "../middlewares/auth.js";
 import { validate } from "../middlewares/validate.js";
+
 import {
   createTestimonialSchema,
   updateTestimonialSchema,
   addCommentSchema,
+  idParamSchema,
 } from "../validators/testimonials.validator.js";
 
 const router = express.Router();
 
-// Public endpoints
-router.get("/", getTestimonials);
-router.get("/featured", getFeatured);
-router.get("/stats", getStats);
-router.get("/:id", getTestimonial);
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
-// Authenticated endpoints
+router.get("/", getTestimonials);
+
+router.get("/featured", getFeatured);
+
+router.get("/stats", getStats);
+
+router.get("/:id", validate(idParamSchema, "params"), getTestimonial);
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
+
 router.use(authMiddleware);
 
 router.post("/", validate(createTestimonialSchema), createTestimonial);
-router.patch("/:id", validate(updateTestimonialSchema), updateTestimonial);
-router.delete("/:id", deleteTestimonial);
 
-router.post("/:id/like", likeTestimonial);
-router.post("/:id/bookmark", bookmarkTestimonial);
-router.post("/:id/comment", validate(addCommentSchema), addComment);
+router.patch(
+  "/:id",
+  validate(idParamSchema, "params"),
+  validate(updateTestimonialSchema),
+  updateTestimonial,
+);
+
+router.delete("/:id", validate(idParamSchema, "params"), deleteTestimonial);
+
+router.post("/:id/like", validate(idParamSchema, "params"), likeTestimonial);
+
+router.post(
+  "/:id/bookmark",
+  validate(idParamSchema, "params"),
+  bookmarkTestimonial,
+);
+
+router.post(
+  "/:id/comment",
+  validate(idParamSchema, "params"),
+  validate(addCommentSchema),
+  addComment,
+);
 
 export default router;
