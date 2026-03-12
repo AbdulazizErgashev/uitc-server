@@ -1,12 +1,13 @@
 import { prisma } from "../../prisma/prisma.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { AppError } from "../utils/AppError.js";
 
 // GET /api/testimonials
 export const getTestimonials = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, company, course, year, search, sort } = req.query;
 
-  page = Number(page);
-  limit = Number(limit);
+  page = Math.max(Number(page), 1);
+  limit = Math.min(Math.max(Number(limit), 1), 100); // max 100 per page
 
   const filters = {};
   if (company) filters.company_id = company;
@@ -16,7 +17,6 @@ export const getTestimonials = asyncHandler(async (req, res) => {
     const end = new Date(`${Number(year) + 1}-01-01`);
     filters.date = { gte: start, lt: end };
   }
-
   if (search) {
     filters.OR = [
       { name: { contains: search, mode: "insensitive" } },
@@ -25,7 +25,7 @@ export const getTestimonials = asyncHandler(async (req, res) => {
     ];
   }
 
-  let orderBy = { created_at: "desc" }; // default
+  let orderBy = { created_at: "desc" };
   if (sort === "popular") orderBy = { likes_count: "desc" };
   else if (sort === "rating") orderBy = { rating: "desc" };
   else if (sort === "recent") orderBy = { created_at: "desc" };
@@ -47,28 +47,31 @@ export const getTestimonials = asyncHandler(async (req, res) => {
   });
 });
 
-// GET /api/testimonials/:id
+// GET single
 export const getTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const testimonial = await prisma.testimonial.findUnique({
     where: { id },
     include: { user: true, course: true, company: true, comments: true },
   });
-  if (!testimonial)
-    return res.status(404).json({ message: "Testimonial not found" });
+  if (!testimonial) throw new AppError("Testimonial not found", 404);
+
   res.json({ success: true, data: testimonial });
 });
 
-// POST /api/testimonials
+// CREATE
 export const createTestimonial = asyncHandler(async (req, res) => {
   const data = { ...req.body, user_id: req.user.id, date: new Date() };
   const testimonial = await prisma.testimonial.create({ data });
   res.status(201).json({ success: true, data: testimonial });
 });
 
-// PATCH /api/testimonials/:id
+// UPDATE
 export const updateTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const exists = await prisma.testimonial.findUnique({ where: { id } });
+  if (!exists) throw new AppError("Testimonial not found", 404);
+
   const testimonial = await prisma.testimonial.update({
     where: { id },
     data: req.body,
@@ -76,68 +79,96 @@ export const updateTestimonial = asyncHandler(async (req, res) => {
   res.json({ success: true, data: testimonial });
 });
 
-// DELETE /api/testimonials/:id
+// DELETE
 export const deleteTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const exists = await prisma.testimonial.findUnique({ where: { id } });
+  if (!exists) throw new AppError("Testimonial not found", 404);
+
   await prisma.testimonial.delete({ where: { id } });
   res.json({ success: true, message: "Deleted successfully" });
 });
 
-// POST /api/testimonials/:id/like
+// LIKE (transaction-safe)
 export const likeTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const like = await prisma.like.create({
-    data: { user_id: req.user.id, testimonial_id: id },
+
+  const existing = await prisma.like.findUnique({
+    where: {
+      user_id_testimonial_id: { user_id: req.user.id, testimonial_id: id },
+    },
   });
-  await prisma.testimonial.update({
-    where: { id },
-    data: { likes_count: { increment: 1 } },
-  });
-  res.json({ success: true, data: like });
+  if (existing) throw new AppError("Already liked", 400);
+
+  await prisma.$transaction([
+    prisma.like.create({
+      data: { user_id: req.user.id, testimonial_id: id },
+    }),
+    prisma.testimonial.update({
+      where: { id },
+      data: { likes_count: { increment: 1 } },
+    }),
+  ]);
+
+  res.json({ success: true, message: "Liked successfully" });
 });
 
-// POST /api/testimonials/:id/bookmark
+// BOOKMARK
 export const bookmarkTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const bookmark = await prisma.bookmark.create({
+
+  const existing = await prisma.bookmark.findUnique({
+    where: {
+      user_id_testimonial_id: { user_id: req.user.id, testimonial_id: id },
+    },
+  });
+  if (existing) throw new AppError("Already bookmarked", 400);
+
+  await prisma.bookmark.create({
     data: { user_id: req.user.id, testimonial_id: id },
   });
-  res.json({ success: true, data: bookmark });
+
+  res.json({ success: true, message: "Bookmarked successfully" });
 });
 
-// POST /api/testimonials/:id/comment
+// COMMENT
 export const addComment = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { text } = req.body;
-  const comment = await prisma.comment.create({
-    data: { user_id: req.user.id, testimonial_id: id, text },
-  });
-  await prisma.testimonial.update({
-    where: { id },
-    data: { comments_count: { increment: 1 } },
-  });
-  res.json({ success: true, data: comment });
+  if (!text) throw new AppError("Comment text is required", 400);
+
+  await prisma.$transaction([
+    prisma.comment.create({
+      data: { user_id: req.user.id, testimonial_id: id, text },
+    }),
+    prisma.testimonial.update({
+      where: { id },
+      data: { comments_count: { increment: 1 } },
+    }),
+  ]);
+
+  res.json({ success: true, message: "Comment added successfully" });
 });
 
-// GET /api/stats
+// STATS
 export const getStats = asyncHandler(async (req, res) => {
-  const totalTestimonials = await prisma.testimonial.count();
-  const avgRating = await prisma.testimonial.aggregate({
-    _avg: { rating: true },
-  });
-  const companiesCount = await prisma.company.count();
+  const [totalTestimonials, avgRatingAgg, companiesCount] = await Promise.all([
+    prisma.testimonial.count(),
+    prisma.testimonial.aggregate({ _avg: { rating: true } }),
+    prisma.company.count(),
+  ]);
 
   res.json({
     success: true,
     data: {
       totalTestimonials,
-      avgRating: avgRating._avg.rating,
+      avgRating: avgRatingAgg._avg.rating || 0,
       companiesCount,
     },
   });
 });
 
-// GET /api/stats/featured
+// FEATURED
 export const getFeatured = asyncHandler(async (req, res) => {
   const featured = await prisma.testimonial.findMany({
     where: { featured: true },
