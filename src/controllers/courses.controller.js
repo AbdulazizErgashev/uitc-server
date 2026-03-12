@@ -1,66 +1,39 @@
-import { prisma } from "../../prisma/prisma.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { successResponse } from "../utils/apiResponse.js";
+import {
+  getAllCourses,
+  getCourseById,
+  createCourseService,
+  updateCourseService,
+  deleteCourseService,
+} from "../services/courses.service.js";
 
 // Get all courses
-export const getCourses = async (req, res) => {
-  try {
-    const courses = await prisma.course.findMany();
-    res.json(courses);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const getCourses = asyncHandler(async (req, res) => {
+  const courses = await getAllCourses();
+  successResponse(res, courses, "Courses fetched successfully");
+});
 
 // Get single course
-export const getCourse = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const course = await prisma.course.findUnique({ where: { id } });
-    if (!course) return res.status(404).json({ message: "Course not found" });
-    res.json(course);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const getCourse = asyncHandler(async (req, res) => {
+  const course = await getCourseById(req.params.id);
+  successResponse(res, course, "Course fetched successfully");
+});
 
 // Create course
-export const createCourse = async (req, res) => {
-  try {
-    const { name, description } = req.body;
-    const course = await prisma.course.create({ data: { name, description } });
-    res.status(201).json(course);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const createCourse = asyncHandler(async (req, res) => {
+  const course = await createCourseService(req.body);
+  successResponse(res, course, "Course created successfully");
+});
 
 // Update course
-export const updateCourse = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description } = req.body;
-
-    const updatedCourse = await prisma.course.update({
-      where: { id },
-      data: { name, description },
-    });
-    res.json(updatedCourse);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const updateCourse = asyncHandler(async (req, res) => {
+  const course = await updateCourseService(req.params.id, req.body);
+  successResponse(res, course, "Course updated successfully");
+});
 
 // Delete course
-export const deleteCourse = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await prisma.course.delete({ where: { id } });
-    res.json({ message: "Course deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+export const deleteCourse = asyncHandler(async (req, res) => {
+  await deleteCourseService(req.params.id);
+  successResponse(res, null, "Course deleted successfully");
+});
