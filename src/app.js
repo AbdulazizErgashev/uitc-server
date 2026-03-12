@@ -5,7 +5,7 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 
 import authRoutes from "./routes/auth.route.js";
-import usersRoutes from "./routes/users.route.js";
+// import usersRoutes from "./routes/users.route.js"; // archieved
 import coursesRoutes from "./routes/courses.route.js";
 import companiesRoutes from "./routes/companies.route.js";
 import testimonialsRoutes from "./routes/testimonials.route.js";
@@ -26,7 +26,7 @@ app.use(morgan("dev"));
 // Routes
 app.use("/api", apiLimiter);
 app.use("/api/auth", authRoutes);
-app.use("/api/users", usersRoutes);
+// app.use("/api/users", usersRoutes); // archieved
 app.use("/api/courses", coursesRoutes);
 app.use("/api/companies", companiesRoutes);
 app.use("/api/testimonials", testimonialsRoutes);

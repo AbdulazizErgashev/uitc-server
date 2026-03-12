@@ -4,14 +4,14 @@ import {
   login,
   me,
   update,
-} from "../controllers/adminAuth.controller.js";
+} from "../controllers/auth.controller.js";
 import { authMiddleware } from "../middlewares/auth.js";
 import { validate } from "../middlewares/validate.js";
 import {
   adminRegisterSchema,
   adminLoginSchema,
   adminUpdateSchema,
-} from "../validators/adminAuth.validator.js";
+} from "../validators/auth.validator.js";
 import { logout } from "../controllers/auth.controller.js";
 
 const router = express.Router();

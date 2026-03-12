@@ -24,12 +24,12 @@ export const adminUpdateSchema = z
   .object({
     phone: z
       .string()
-      .optional()
-      .regex(/^\+?\d{9,15}$/, "Invalid phone number"),
+      .regex(/^\+?\d{9,15}$/, "Invalid phone number")
+      .optional(),
     password: z
       .string()
-      .optional()
-      .min(6, "Password must be at least 6 characters"),
+      .min(6, "Password must be at least 6 characters")
+      .optional(),
     confirm_password: z.string().optional(),
   })
   .refine(

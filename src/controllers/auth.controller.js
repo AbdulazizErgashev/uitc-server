@@ -5,7 +5,7 @@ import {
   loginAdmin,
   getAdminMe,
   updateAdmin,
-} from "../services/adminAuth.service.js";
+} from "../services/auth.service.js";
 
 // Register
 export const register = asyncHandler(async (req, res) => {
