@@ -14,6 +14,11 @@ export const createCompanySchema = z
       .min(2, "Company name must be at least 2 characters")
       .max(100, "Company name must be less than 100 characters"),
 
+    color: z
+      .string()
+      .regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid hex color")
+      .optional(),
+
     logo_url: z.string().url("Invalid logo URL").optional(),
 
     website: z.string().url("Invalid website URL").optional(),
@@ -26,6 +31,11 @@ export const createCompanySchema = z
 export const updateCompanySchema = z
   .object({
     name: z.string().trim().min(2).max(100).optional(),
+
+    color: z
+      .string()
+      .regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid hex color")
+      .optional(),
 
     logo_url: z.string().url().optional(),
 
