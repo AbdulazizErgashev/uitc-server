@@ -12,6 +12,7 @@ model User {
   full_name  String
   phone      String?   @unique
   password   String
+  role       String   @default("admin")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
