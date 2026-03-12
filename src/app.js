@@ -11,6 +11,8 @@ import companiesRoutes from "./routes/companies.route.js";
 import testimonialsRoutes from "./routes/testimonials.route.js";
 import { errorHandler } from "./middlewares/error.js";
 
+import { apiLimiter } from "./middlewares/rateLimit.js";
+
 dotenv.config();
 
 const app = express();
@@ -20,19 +22,22 @@ app.use(cors());
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("dev"));
-app.use(errorHandler);
 
 // Routes
+app.use("/api", apiLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/courses", coursesRoutes);
 app.use("/api/companies", companiesRoutes);
 app.use("/api/testimonials", testimonialsRoutes);
 
+// Health & root
 app.get("/", (req, res) => res.json({ message: "API working 🚀" }));
-
 app.get("/health", (req, res) =>
   res.json({ status: "ok", uptime: process.uptime(), timestamp: new Date() }),
 );
+
+// ERROR handler last
+app.use(errorHandler);
 
 export default app;

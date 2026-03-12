@@ -1,74 +1,91 @@
 import { prisma } from "../../prisma/prisma.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { AppError } from "../utils/AppError.js";
+import { successResponse } from "../utils/apiResponse.js";
+import { APIFeatures } from "../utils/apiFeatures.js";
 
-// GET /api/testimonials
+// GET /api/testimonials (with filtering, sorting, pagination)
 export const getTestimonials = asyncHandler(async (req, res) => {
-  let { page = 1, limit = 10, company, course, year, search, sort } = req.query;
+  const { page = 1, limit = 10, company, course, year, search } = req.query;
 
-  page = Math.max(Number(page), 1);
-  limit = Math.min(Math.max(Number(limit), 1), 100); // max 100 per page
-
-  const filters = {};
-  if (company) filters.company_id = company;
-  if (course) filters.course_id = course;
+  // Advanced filters
+  const filterObj = {};
+  if (company) filterObj.company_id = company;
+  if (course) filterObj.course_id = course;
   if (year) {
     const start = new Date(`${year}-01-01`);
     const end = new Date(`${Number(year) + 1}-01-01`);
-    filters.date = { gte: start, lt: end };
+    filterObj.date = { gte: start, lt: end };
   }
   if (search) {
-    filters.OR = [
+    filterObj.OR = [
       { name: { contains: search, mode: "insensitive" } },
       { quote: { contains: search, mode: "insensitive" } },
       { long_quote: { contains: search, mode: "insensitive" } },
     ];
   }
 
-  let orderBy = { created_at: "desc" };
-  if (sort === "popular") orderBy = { likes_count: "desc" };
-  else if (sort === "rating") orderBy = { rating: "desc" };
-  else if (sort === "recent") orderBy = { created_at: "desc" };
+  // Initialize APIFeatures
+  const features = new APIFeatures(prisma.testimonial, req.query)
+    .filter()
+    .sort()
+    .paginate();
 
-  const total = await prisma.testimonial.count({ where: filters });
+  // Merge advanced filters into Prisma query
+  features.queryOptions.where = {
+    ...features.queryOptions.where,
+    ...filterObj,
+  };
 
-  const testimonials = await prisma.testimonial.findMany({
-    where: filters,
-    include: { user: true, course: true, company: true },
-    orderBy,
-    skip: (page - 1) * limit,
-    take: limit,
+  // Count total for meta
+  const total = await prisma.testimonial.count({
+    where: features.queryOptions.where,
   });
 
-  res.json({
-    success: true,
-    meta: { total, page, limit, pages: Math.ceil(total / limit) },
-    data: testimonials,
-  });
+  const testimonials = await features.execute();
+
+  successResponse(
+    res,
+    {
+      meta: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        pages: Math.ceil(total / Number(limit)),
+      },
+      testimonials,
+    },
+    "Testimonials fetched successfully",
+  );
 });
 
-// GET single
+// GET single testimonial
 export const getTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
+
   const testimonial = await prisma.testimonial.findUnique({
     where: { id },
     include: { user: true, course: true, company: true, comments: true },
   });
+
   if (!testimonial) throw new AppError("Testimonial not found", 404);
 
-  res.json({ success: true, data: testimonial });
+  successResponse(res, testimonial, "Testimonial fetched successfully");
 });
 
-// CREATE
+// CREATE testimonial
 export const createTestimonial = asyncHandler(async (req, res) => {
   const data = { ...req.body, user_id: req.user.id, date: new Date() };
+
   const testimonial = await prisma.testimonial.create({ data });
-  res.status(201).json({ success: true, data: testimonial });
+
+  successResponse(res, testimonial, "Testimonial created successfully");
 });
 
-// UPDATE
+// UPDATE testimonial
 export const updateTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
+
   const exists = await prisma.testimonial.findUnique({ where: { id } });
   if (!exists) throw new AppError("Testimonial not found", 404);
 
@@ -76,20 +93,23 @@ export const updateTestimonial = asyncHandler(async (req, res) => {
     where: { id },
     data: req.body,
   });
-  res.json({ success: true, data: testimonial });
+
+  successResponse(res, testimonial, "Testimonial updated successfully");
 });
 
-// DELETE
+// DELETE testimonial
 export const deleteTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
+
   const exists = await prisma.testimonial.findUnique({ where: { id } });
   if (!exists) throw new AppError("Testimonial not found", 404);
 
   await prisma.testimonial.delete({ where: { id } });
-  res.json({ success: true, message: "Deleted successfully" });
+
+  successResponse(res, null, "Testimonial deleted successfully");
 });
 
-// LIKE (transaction-safe)
+// LIKE testimonial (transaction-safe)
 export const likeTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -110,10 +130,10 @@ export const likeTestimonial = asyncHandler(async (req, res) => {
     }),
   ]);
 
-  res.json({ success: true, message: "Liked successfully" });
+  successResponse(res, null, "Testimonial liked successfully");
 });
 
-// BOOKMARK
+// BOOKMARK testimonial
 export const bookmarkTestimonial = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -128,13 +148,14 @@ export const bookmarkTestimonial = asyncHandler(async (req, res) => {
     data: { user_id: req.user.id, testimonial_id: id },
   });
 
-  res.json({ success: true, message: "Bookmarked successfully" });
+  successResponse(res, null, "Testimonial bookmarked successfully");
 });
 
-// COMMENT
+// ADD COMMENT
 export const addComment = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { text } = req.body;
+
   if (!text) throw new AppError("Comment text is required", 400);
 
   await prisma.$transaction([
@@ -147,10 +168,10 @@ export const addComment = asyncHandler(async (req, res) => {
     }),
   ]);
 
-  res.json({ success: true, message: "Comment added successfully" });
+  successResponse(res, null, "Comment added successfully");
 });
 
-// STATS
+// GET stats
 export const getStats = asyncHandler(async (req, res) => {
   const [totalTestimonials, avgRatingAgg, companiesCount] = await Promise.all([
     prisma.testimonial.count(),
@@ -158,22 +179,24 @@ export const getStats = asyncHandler(async (req, res) => {
     prisma.company.count(),
   ]);
 
-  res.json({
-    success: true,
-    data: {
+  successResponse(
+    res,
+    {
       totalTestimonials,
       avgRating: avgRatingAgg._avg.rating || 0,
       companiesCount,
     },
-  });
+    "Statistics fetched successfully",
+  );
 });
 
-// FEATURED
+// GET featured testimonials
 export const getFeatured = asyncHandler(async (req, res) => {
   const featured = await prisma.testimonial.findMany({
     where: { featured: true },
     include: { user: true, course: true, company: true },
     orderBy: { created_at: "desc" },
   });
-  res.json({ success: true, data: featured });
+
+  successResponse(res, featured, "Featured testimonials fetched successfully");
 });
