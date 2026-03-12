@@ -1,14 +1,45 @@
-// validators/auth.validator.js
 import { z } from "zod";
 
-export const registerSchema = z.object({
-  full_name: z.string().min(2, "Full name too short"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.enum(["admin", "teacher", "student"]),
-});
+// Admin register
+export const adminRegisterSchema = z
+  .object({
+    full_name: z.string().min(2, "Full name too short"),
+    phone: z.string().regex(/^\+?\d{9,15}$/, "Invalid phone number"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirm_password: z.string().min(6, "Confirm password required"),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: "Passwords do not match",
+    path: ["confirm_password"],
+  });
 
-export const loginSchema = z.object({
-  email: z.string().email("Invalid email"),
+// Admin login
+export const adminLoginSchema = z.object({
+  phone: z.string().regex(/^\+?\d{9,15}$/, "Invalid phone number"),
   password: z.string().min(6, "Password required"),
 });
+
+// Admin update (phone & password only)
+export const adminUpdateSchema = z
+  .object({
+    phone: z
+      .string()
+      .optional()
+      .regex(/^\+?\d{9,15}$/, "Invalid phone number"),
+    password: z
+      .string()
+      .optional()
+      .min(6, "Password must be at least 6 characters"),
+    confirm_password: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.password || data.confirm_password)
+        return data.password === data.confirm_password;
+      return true;
+    },
+    {
+      message: "Passwords do not match",
+      path: ["confirm_password"],
+    },
+  );

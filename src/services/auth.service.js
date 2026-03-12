@@ -1,4 +1,3 @@
-// services/auth.service.js
 import { prisma } from "../../prisma/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -6,50 +5,78 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1d";
 
-export const registerUser = async ({ full_name, email, password, role }) => {
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) throw new Error("Email already exists");
+export const registerAdmin = async ({ full_name, phone, password }) => {
+  const existing = await prisma.user.findUnique({ where: { email: phone } });
+  if (existing) throw new Error("Phone already exists");
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await prisma.user.create({
-    data: { full_name, email, password: hashedPassword, role },
+  const admin = await prisma.user.create({
+    data: {
+      full_name,
+      email: phone, // email field used as phone
+      password: hashedPassword,
+      role: "admin",
+    },
   });
 
-  const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
+  const token = jwt.sign({ id: admin.id, role: admin.role }, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+  });
+
+  return { admin: { id: admin.id, full_name, phone, role: admin.role }, token };
+};
+
+export const loginAdmin = async ({ phone, password }) => {
+  const admin = await prisma.user.findUnique({ where: { email: phone } });
+  if (!admin || admin.role !== "admin") throw new Error("Invalid credentials");
+
+  const match = await bcrypt.compare(password, admin.password);
+  if (!match) throw new Error("Invalid credentials");
+
+  const token = jwt.sign({ id: admin.id, role: admin.role }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
   });
 
   return {
-    user: { id: user.id, full_name, email, role },
+    admin: {
+      id: admin.id,
+      full_name: admin.full_name,
+      phone,
+      role: admin.role,
+    },
     token,
   };
 };
 
-export const loginUser = async ({ email, password }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("Invalid credentials");
+export const updateAdmin = async (adminId, data) => {
+  const existingAdmin = await prisma.user.findUnique({
+    where: { id: adminId },
+  });
+  if (!existingAdmin || existingAdmin.role !== "admin")
+    throw new Error("Admin not found");
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error("Invalid credentials");
+  const updateData = {};
+  if (data.phone) updateData.email = data.phone; // using email field as phone
+  if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
 
-  const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
+  const updated = await prisma.user.update({
+    where: { id: adminId },
+    data: updateData,
+    select: { id: true, full_name: true, email: true, role: true },
   });
 
-  return {
-    user: { id: user.id, full_name: user.full_name, email, role: user.role },
-    token,
-  };
+  return { admin: updated };
 };
 
-export const getMe = async (userId) => {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error("User not found");
+export const getAdminMe = async (adminId) => {
+  const admin = await prisma.user.findUnique({ where: { id: adminId } });
+  if (!admin || admin.role !== "admin") throw new Error("Admin not found");
+
   return {
-    id: user.id,
-    full_name: user.full_name,
-    email: user.email,
-    role: user.role,
+    id: admin.id,
+    full_name: admin.full_name,
+    phone: admin.email,
+    role: admin.role,
   };
 };

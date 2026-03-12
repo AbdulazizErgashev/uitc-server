@@ -1,13 +1,17 @@
-// controllers/auth.controller.js
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
-import { registerUser, loginUser, getMe } from "../services/auth.service.js";
+import {
+  registerAdmin,
+  loginAdmin,
+  getAdminMe,
+  updateAdmin,
+} from "../services/adminAuth.service.js";
 
 // Register
 export const register = asyncHandler(async (req, res) => {
   try {
-    const result = await registerUser(req.body);
-    successResponse(res, result, "User registered successfully");
+    const result = await registerAdmin(req.body);
+    successResponse(res, result, "Admin registered successfully");
   } catch (error) {
     errorResponse(res, error.message, 400);
   }
@@ -16,7 +20,7 @@ export const register = asyncHandler(async (req, res) => {
 // Login
 export const login = asyncHandler(async (req, res) => {
   try {
-    const result = await loginUser(req.body);
+    const result = await loginAdmin(req.body);
     successResponse(res, result, "Logged in successfully");
   } catch (error) {
     errorResponse(res, error.message, 400);
@@ -26,8 +30,18 @@ export const login = asyncHandler(async (req, res) => {
 // Me
 export const me = asyncHandler(async (req, res) => {
   try {
-    const user = await getMe(req.user.id);
-    successResponse(res, user, "User fetched successfully");
+    const admin = await getAdminMe(req.user.id);
+    successResponse(res, admin, "Admin fetched successfully");
+  } catch (error) {
+    errorResponse(res, error.message, 400);
+  }
+});
+
+// Update
+export const update = asyncHandler(async (req, res) => {
+  try {
+    const updated = await updateAdmin(req.user.id, req.body);
+    successResponse(res, updated, "Admin updated successfully");
   } catch (error) {
     errorResponse(res, error.message, 400);
   }
