@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1d";
 
 export const registerAdmin = async ({ full_name, phone, password }) => {
-  const existing = await prisma.user.findUnique({ where: { email: phone } });
+  const existing = await prisma.user.findUnique({ where: { phone } });
   if (existing) throw new Error("Phone already exists");
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -14,7 +14,7 @@ export const registerAdmin = async ({ full_name, phone, password }) => {
   const admin = await prisma.user.create({
     data: {
       full_name,
-      email: phone, // email field used as phone
+      phone: phone, // email field used as phone
       password: hashedPassword,
       role: "admin",
     },
@@ -28,7 +28,7 @@ export const registerAdmin = async ({ full_name, phone, password }) => {
 };
 
 export const loginAdmin = async ({ phone, password }) => {
-  const admin = await prisma.user.findUnique({ where: { email: phone } });
+  const admin = await prisma.user.findUnique({ where: { phone } });
   if (!admin || admin.role !== "admin") throw new Error("Invalid credentials");
 
   const match = await bcrypt.compare(password, admin.password);
@@ -57,13 +57,13 @@ export const updateAdmin = async (adminId, data) => {
     throw new Error("Admin not found");
 
   const updateData = {};
-  if (data.phone) updateData.email = data.phone; // using email field as phone
+  if (data.phone) updateData.phone = data.phone; // using email field as phone
   if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
 
   const updated = await prisma.user.update({
     where: { id: adminId },
     data: updateData,
-    select: { id: true, full_name: true, email: true, role: true },
+    select: { id: true, full_name: true, phone: true },
   });
 
   return { admin: updated };
