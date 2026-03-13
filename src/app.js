@@ -12,6 +12,8 @@ import testimonialsRoutes from "./routes/testimonials.route.js";
 import { errorHandler } from "./middlewares/error.js";
 
 import { apiLimiter } from "./middlewares/rateLimit.js";
+import uploadRoutes from "./routes/upload.route.js";
+import { swaggerDocs } from "./utils/swagger.js";
 
 dotenv.config();
 
@@ -30,6 +32,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/courses", coursesRoutes);
 app.use("/api/companies", companiesRoutes);
 app.use("/api/testimonials", testimonialsRoutes);
+app.use("/api/upload", uploadRoutes);
+
+swaggerDocs(app);
 
 // Health & root
 app.get("/", (req, res) => res.json({ message: "API working 🚀" }));
