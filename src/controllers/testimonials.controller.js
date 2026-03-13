@@ -12,6 +12,8 @@ import {
   addCommentService,
   getStatsService,
   getFeaturedService,
+  getTopRatedService,
+  getByTagService,
 } from "../services/testimonials.service.js";
 
 // GET all testimonials
@@ -99,4 +101,25 @@ export const getStats = asyncHandler(async (req, res) => {
 export const getFeatured = asyncHandler(async (req, res) => {
   const featured = await getFeaturedService();
   successResponse(res, featured, "Featured testimonials fetched successfully");
+});
+
+export const getTrending = asyncHandler(async (req, res) => {
+  const data = await getTrendingService();
+  successResponse(res, data, "Trending testimonials");
+});
+
+export const getByTag = asyncHandler(async (req, res) => {
+  const { tag } = req.query;
+  const data = await getByTagService(tag);
+  successResponse(res, data, `Testimonials for tag: ${tag}`);
+});
+
+export const getTopRated = asyncHandler(async (req, res) => {
+  const data = await getTopRatedService();
+  successResponse(res, data, "Top rated testimonials");
+});
+
+export const shareTestimonial = asyncHandler(async (req, res) => {
+  const updated = await shareTestimonialService(req.params.id);
+  successResponse(res, updated, "Testimonial shared successfully");
 });

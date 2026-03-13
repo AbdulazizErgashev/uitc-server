@@ -137,3 +137,38 @@ export const getFeaturedService = async () => {
     orderBy: { created_at: "desc" },
   });
 };
+
+export const getTrendingService = async (limit = 5) => {
+  return await prisma.testimonial.findMany({
+    orderBy: { likes_count: "desc" },
+    take: limit,
+    include: { user: true, course: true, company: true },
+  });
+};
+
+export const getByTagService = async (tag) => {
+  return await prisma.testimonial.findMany({
+    where: { tags: { has: tag } },
+    include: { user: true, course: true, company: true },
+  });
+};
+
+export const getTopRatedService = async (limit = 5) => {
+  return await prisma.testimonial.findMany({
+    orderBy: { rating: "desc" },
+    take: limit,
+    include: { user: true, course: true, company: true },
+  });
+};
+
+export const shareTestimonialService = async (testimonialId) => {
+  const exists = await prisma.testimonial.findUnique({
+    where: { id: testimonialId },
+  });
+  if (!exists) throw new AppError("Testimonial not found", 404);
+
+  return await prisma.testimonial.update({
+    where: { id: testimonialId },
+    data: { shares_count: { increment: 1 } },
+  });
+};

@@ -11,6 +11,10 @@ import {
   addComment,
   getStats,
   getFeatured,
+  getTrending,
+  getTopRated,
+  getByTag,
+  shareTestimonial,
 } from "../controllers/testimonials.controller.js";
 
 import { authMiddleware } from "../middlewares/auth.js";
@@ -38,6 +42,10 @@ router.get("/featured", getFeatured);
 router.get("/stats", getStats);
 
 router.get("/:id", validate(idParamSchema, "params"), getTestimonial);
+
+router.get("/trending", getTrending);
+router.get("/top-rated", getTopRated);
+router.get("/tag", getByTag); // ?tag=javascript
 
 /*
 |--------------------------------------------------------------------------
@@ -72,5 +80,7 @@ router.post(
   validate(addCommentSchema),
   addComment,
 );
+
+router.post("/:id/share", validate(idParamSchema, "params"), shareTestimonial);
 
 export default router;
