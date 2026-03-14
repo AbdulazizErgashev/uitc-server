@@ -1,20 +1,16 @@
 import express from "express";
-
 import {
   getUsers,
   getUser,
   updateUser,
   deleteUser,
-} from "../controllers/users.controller.js";
+} from "./users.controller.js";
 
-import { authMiddleware } from "../middlewares/auth.js";
-import { adminMiddleware } from "../middlewares/role.js";
-import { validate } from "../middlewares/validate.js";
+import { authMiddleware } from "../../middlewares/auth.js";
+import { adminMiddleware } from "../../middlewares/role.js";
+import { validate } from "../../middlewares/validate.js";
 
-import {
-  updateUserSchema,
-  idParamSchema,
-} from "../validators/users.validator.js";
+import { updateUserSchema, idParamSchema } from "../../validators/users.validator.js";
 
 const router = express.Router();
 

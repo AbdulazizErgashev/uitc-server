@@ -1,11 +1,11 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { successResponse, errorResponse } from "../utils/apiResponse.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { successResponse, errorResponse } from "../../utils/apiResponse.js";
 import {
   registerAdmin,
   loginAdmin,
   getAdminMe,
   updateAdmin,
-} from "../services/auth.service.js";
+} from "./auth.service.js";
 
 // Register
 export const register = asyncHandler(async (req, res) => {

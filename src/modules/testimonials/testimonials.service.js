@@ -1,16 +1,12 @@
-import { prisma } from "../../prisma/prisma.js";
-import { AppError } from "../utils/AppError.js";
+import { prisma } from "../../../prisma/prisma.js";
+import { AppError } from "../../utils/AppError.js";
 
-// Get testimonials with filters, sorting, pagination
 export const getTestimonialsService = async ({
   filters = {},
   queryOptions = {},
 }) => {
   const total = await prisma.testimonial.count({ where: filters });
-
-  // Merge filters into query options
   queryOptions.where = { ...queryOptions.where, ...filters };
-
   const testimonials = await prisma.testimonial.findMany(queryOptions);
 
   return {
@@ -24,7 +20,6 @@ export const getTestimonialsService = async ({
   };
 };
 
-// Get single testimonial
 export const getTestimonialByIdService = async (id) => {
   const testimonial = await prisma.testimonial.findUnique({
     where: { id },
@@ -34,19 +29,16 @@ export const getTestimonialByIdService = async (id) => {
   return testimonial;
 };
 
-// Create testimonial
 export const createTestimonialService = async (data) => {
   return await prisma.testimonial.create({ data });
 };
 
-// Update testimonial
 export const updateTestimonialService = async (id, data) => {
   const exists = await prisma.testimonial.findUnique({ where: { id } });
   if (!exists) throw new AppError("Testimonial not found", 404);
   return await prisma.testimonial.update({ where: { id }, data });
 };
 
-// Delete testimonial
 export const deleteTestimonialService = async (id) => {
   const exists = await prisma.testimonial.findUnique({ where: { id } });
   if (!exists) throw new AppError("Testimonial not found", 404);
@@ -54,7 +46,6 @@ export const deleteTestimonialService = async (id) => {
   return true;
 };
 
-// Like testimonial
 export const likeTestimonialService = async (testimonialId, userId) => {
   const existing = await prisma.like.findUnique({
     where: {
@@ -79,7 +70,6 @@ export const likeTestimonialService = async (testimonialId, userId) => {
   return true;
 };
 
-// Bookmark testimonial
 export const bookmarkTestimonialService = async (testimonialId, userId) => {
   const existing = await prisma.bookmark.findUnique({
     where: {
@@ -97,7 +87,6 @@ export const bookmarkTestimonialService = async (testimonialId, userId) => {
   return true;
 };
 
-// Add comment
 export const addCommentService = async (testimonialId, userId, text) => {
   if (!text) throw new AppError("Comment text is required", 400);
 
@@ -114,7 +103,6 @@ export const addCommentService = async (testimonialId, userId, text) => {
   return true;
 };
 
-// Get stats
 export const getStatsService = async () => {
   const [totalTestimonials, avgRatingAgg, companiesCount] = await Promise.all([
     prisma.testimonial.count(),
@@ -129,7 +117,6 @@ export const getStatsService = async () => {
   };
 };
 
-// Get featured testimonials
 export const getFeaturedService = async () => {
   return await prisma.testimonial.findMany({
     where: { featured: true },

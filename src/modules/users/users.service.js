@@ -1,8 +1,7 @@
-import { prisma } from "../../prisma/prisma.js";
+import { prisma } from "../../../prisma/prisma.js";
 import bcrypt from "bcrypt";
-import { AppError } from "../utils/AppError.js";
+import { AppError } from "../../utils/AppError.js";
 
-// Get all users
 export const getAllUsersService = async () => {
   return await prisma.user.findMany({
     select: {
@@ -16,7 +15,6 @@ export const getAllUsersService = async () => {
   });
 };
 
-// Get single user
 export const getUserByIdService = async (id) => {
   const user = await prisma.user.findUnique({
     where: { id },
@@ -28,12 +26,10 @@ export const getUserByIdService = async (id) => {
       created_at: true,
     },
   });
-
   if (!user) throw new AppError("User not found", 404);
   return user;
 };
 
-// Update user
 export const updateUserService = async (id, body) => {
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) throw new AppError("User not found", 404);
@@ -57,7 +53,6 @@ export const updateUserService = async (id, body) => {
   });
 };
 
-// Delete user
 export const deleteUserService = async (id) => {
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) throw new AppError("User not found", 404);

@@ -4,15 +4,9 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 
-import authRoutes from "./routes/auth.route.js";
-// import usersRoutes from "./routes/users.route.js"; // archieved
-import coursesRoutes from "./routes/courses.route.js";
-import companiesRoutes from "./routes/companies.route.js";
-import testimonialsRoutes from "./routes/testimonials.route.js";
-import { errorHandler } from "./middlewares/error.js";
+import ApiRoutes from "./utils/apiRoutes.js";
 
-import { apiLimiter } from "./middlewares/rateLimit.js";
-import uploadRoutes from "./routes/upload.route.js";
+import { errorHandler } from "./middlewares/error.js";
 import { swaggerDocs } from "./utils/swagger.js";
 
 dotenv.config();
@@ -26,13 +20,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 // Routes
-app.use("/api", apiLimiter);
-app.use("/api/auth", authRoutes);
-// app.use("/api/users", usersRoutes); // archieved
-app.use("/api/courses", coursesRoutes);
-app.use("/api/companies", companiesRoutes);
-app.use("/api/testimonials", testimonialsRoutes);
-app.use("/api/upload", uploadRoutes);
+app.use("/api", ApiRoutes);
 
 swaggerDocs(app);
 

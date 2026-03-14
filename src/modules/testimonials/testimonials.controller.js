@@ -1,6 +1,6 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { successResponse } from "../utils/apiResponse.js";
-import { APIFeatures } from "../utils/apiFeatures.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { successResponse } from "../../utils/apiResponse.js";
+import { APIFeatures } from "../../utils/apiFeatures.js";
 import {
   getTestimonialsService,
   getTestimonialByIdService,
@@ -14,9 +14,10 @@ import {
   getFeaturedService,
   getTopRatedService,
   getByTagService,
-} from "../services/testimonials.service.js";
+  getTrendingService,
+  shareTestimonialService,
+} from "./testimonials.service.js";
 
-// GET all testimonials
 export const getTestimonials = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, company, course, year, search } = req.query;
 
@@ -45,13 +46,11 @@ export const getTestimonials = asyncHandler(async (req, res) => {
   successResponse(res, data, "Testimonials fetched successfully");
 });
 
-// GET single testimonial
 export const getTestimonial = asyncHandler(async (req, res) => {
   const testimonial = await getTestimonialByIdService(req.params.id);
   successResponse(res, testimonial, "Testimonial fetched successfully");
 });
 
-// CREATE testimonial
 export const createTestimonial = asyncHandler(async (req, res) => {
   const testimonial = await createTestimonialService({
     ...req.body,
@@ -61,43 +60,36 @@ export const createTestimonial = asyncHandler(async (req, res) => {
   successResponse(res, testimonial, "Testimonial created successfully");
 });
 
-// UPDATE testimonial
 export const updateTestimonial = asyncHandler(async (req, res) => {
   const testimonial = await updateTestimonialService(req.params.id, req.body);
   successResponse(res, testimonial, "Testimonial updated successfully");
 });
 
-// DELETE testimonial
 export const deleteTestimonial = asyncHandler(async (req, res) => {
   await deleteTestimonialService(req.params.id);
   successResponse(res, null, "Testimonial deleted successfully");
 });
 
-// LIKE testimonial
 export const likeTestimonial = asyncHandler(async (req, res) => {
   await likeTestimonialService(req.params.id, req.user.id);
   successResponse(res, null, "Testimonial liked successfully");
 });
 
-// BOOKMARK testimonial
 export const bookmarkTestimonial = asyncHandler(async (req, res) => {
   await bookmarkTestimonialService(req.params.id, req.user.id);
   successResponse(res, null, "Testimonial bookmarked successfully");
 });
 
-// ADD COMMENT
 export const addComment = asyncHandler(async (req, res) => {
   await addCommentService(req.params.id, req.user.id, req.body.text);
   successResponse(res, null, "Comment added successfully");
 });
 
-// GET stats
 export const getStats = asyncHandler(async (req, res) => {
   const stats = await getStatsService();
   successResponse(res, stats, "Statistics fetched successfully");
 });
 
-// GET featured testimonials
 export const getFeatured = asyncHandler(async (req, res) => {
   const featured = await getFeaturedService();
   successResponse(res, featured, "Featured testimonials fetched successfully");

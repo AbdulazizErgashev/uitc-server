@@ -1,18 +1,13 @@
 import express from "express";
-import {
-  register,
-  login,
-  me,
-  update,
-} from "../controllers/auth.controller.js";
-import { authMiddleware } from "../middlewares/auth.js";
-import { validate } from "../middlewares/validate.js";
+import { register, login, me, update } from "./auth.controller.js";
+import { authMiddleware } from "../../middlewares/auth.js";
+import { validate } from "../../middlewares/validate.js";
 import {
   adminRegisterSchema,
   adminLoginSchema,
   adminUpdateSchema,
-} from "../validators/auth.validator.js";
-import { logout } from "../controllers/auth.controller.js";
+} from "../../validators/auth.validator.js";
+import { logout } from "./auth.controller.js";
 
 const router = express.Router();
 

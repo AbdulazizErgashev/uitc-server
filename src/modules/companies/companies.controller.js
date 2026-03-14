@@ -1,38 +1,33 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { successResponse } from "../utils/apiResponse.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { successResponse } from "../../utils/apiResponse.js";
 import {
   getAllCompanies,
   getCompanyById,
   createCompanyService,
   updateCompanyService,
   deleteCompanyService,
-} from "../services/companies.service.js";
+} from "./companies.service.js";
 
-// Get all companies
 export const getCompanies = asyncHandler(async (req, res) => {
   const companies = await getAllCompanies();
   successResponse(res, companies, "Companies fetched successfully");
 });
 
-// Get single company
 export const getCompany = asyncHandler(async (req, res) => {
   const company = await getCompanyById(req.params.id);
   successResponse(res, company, "Company fetched successfully");
 });
 
-// Create company
 export const createCompany = asyncHandler(async (req, res) => {
   const company = await createCompanyService(req.body);
   successResponse(res, company, "Company created successfully");
 });
 
-// Update company
 export const updateCompany = asyncHandler(async (req, res) => {
   const company = await updateCompanyService(req.params.id, req.body);
   successResponse(res, company, "Company updated successfully");
 });
 
-// Delete company
 export const deleteCompany = asyncHandler(async (req, res) => {
   await deleteCompanyService(req.params.id);
   successResponse(res, null, "Company deleted successfully");

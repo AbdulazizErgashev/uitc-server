@@ -1,6 +1,6 @@
 import AWS from "aws-sdk";
 import dotenv from "dotenv";
-import { AppError } from "./apiResponse.js";
+import { AppError } from "./AppError.js";
 
 dotenv.config();
 
