@@ -135,3 +135,47 @@ model Comment {
 
   created_at     DateTime @default(now())
 }
+
+model Portfolio {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  category    PortfolioCategory
+  platform    String?
+  tags        String[] @default([])
+  url         String?
+  media_url   String?
+  is_public   Boolean  @default(true)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model TeamMember {
+  id           String   @id @default(uuid())
+  name         String
+  role         String
+  bio          String?
+  long_bio     String?
+  image        String?
+  linkedin     String?
+  twitter      String?
+  github       String?
+  email        String?
+  expertise    String[] @default([])
+  achievements String[] @default([])
+  etag         String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum PortfolioCategory {
+  web
+  mobile
+  app
+  three_d_modeling
+  three_d_animation
+  two_d_design
+  other
+}

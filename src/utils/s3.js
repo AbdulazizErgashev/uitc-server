@@ -19,8 +19,8 @@ export const uploadToS3 = async (fileBuffer, fileName, mimeType) => {
   };
 
   try {
-    const { Location } = await s3.upload(params).promise();
-    return Location; // S3 public URL
+    const { Location, ETag } = await s3.upload(params).promise();
+    return { url: Location, etag: ETag };
   } catch (err) {
     console.error(err);
     throw new AppError("File upload failed", 500);

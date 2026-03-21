@@ -76,7 +76,7 @@ export const getAdminMe = async (adminId) => {
   return {
     id: admin.id,
     full_name: admin.full_name,
-    phone: admin.email,
+    phone: admin.phone,
     role: admin.role,
   };
 };

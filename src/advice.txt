@@ -1,0 +1,50 @@
+⚠️ Ehtiyot va yaxshilash kerak bo‘lgan joylar
+auth.service.js:
+getAdminMe natijasida phone o‘rniga admin.email qaytib bermoqda (balki typo).
+testimonials.route.js:
+GET /:id oldindan kela olmadi, lekin GET /trending va boshqalar to‘g‘ri tartibda joylangan.
+GET /tag bu yerda query.tag bo‘lsa yaxshi, ammo oddiy /:tag aniqroq.
+AppError klassi ishlatilgan, lekin catch ishlari ham xuddi 400 qaytiradi (custom statusdan foydalanilishi inconsistent).
+authMiddleware xabar yuboradi No token provided lekin format xatolari ko‘proq bo‘lishi mumkin.
+PoP: token yo‘qligida / JWT_SECRET yo‘qligida (runtime no !).
+Testlar–faqat auth; boshqa modul uchun ham unit/integration yo‘q.
+
+
+
+
+
+Final: Middle lavozim uchun yaxshi va o‘rta ustasi / toifa. Agar to‘liq Senior bo‘lishini istasangiz, quyidagilarni qo‘shing:
+
+test coverage 80-90 %
+lint/format + commit hooks
+Docker, CI (GitHub Actions)
+RBAC, rate limit o‘tkazish
+API docs to‘liq (Swagger annotatsiya)
+service abstrakt layer va unit testlari
+security audit (OWASP).
+
+
+
+
+🚀 Tez taklif uchun fixlar (agar hohlasang)
+auth.service.js:
+return { id: admin.id, full_name: admin.full_name, phone: admin.phone, role: admin.role }.
+routes testimonial:
+/tag/:tag yoki /tag?name=....
+authMiddleware:
+token format check + expire mesaj.
+QO‘SHIMCHA:
+npm test, coverage, lint, prettier.
+
+
+🧪 Postman test ketma-ket
+POST /api/auth/login – token ol.
+GET /api/auth/me – token toʻgʻri ekanini tekshir.
+GET /api/portfolio – bo‘sh-yo‘qligini tekshir.
+POST /api/portfolio – yangi portfolio yozuv yarat.
+GET /api/portfolio – count yuqorilanganmi tekshir.
+GET /api/portfolio/:id – 4-dan qaytgan id bilan (o‘sha item).
+PATCH /api/portfolio/:id – description ni o‘zgartirib ko‘r.
+GET /api/portfolio/:id – yangilangan qiymat qaytadimi.
+DELETE /api/portfolio/:id – o‘chirish.
+GET /api/portfolio/:id – 404 yoki not found tekshir.

@@ -5,7 +5,7 @@ export const uploadFile = asyncHandler(async (req, res) => {
   if (!req.file) throw new Error("File required");
 
   const fileName = `${Date.now()}-${req.file.originalname}`;
-  const fileUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+  const { url, etag } = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
 
-  res.status(200).json({ success: true, url: fileUrl });
+  res.status(200).json({ success: true, url, etag });
 });

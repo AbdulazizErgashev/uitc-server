@@ -30,10 +30,10 @@ const router = express.Router();
 router.get("/", getTestimonials);
 router.get("/featured", getFeatured);
 router.get("/stats", getStats);
-router.get("/:id", validate(idParamSchema, "params"), getTestimonial);
 router.get("/trending", getTrending);
 router.get("/top-rated", getTopRated);
 router.get("/tag", getByTag);
+router.get("/:id", validate(idParamSchema, "params"), getTestimonial);
 
 router.use(authMiddleware);
 
