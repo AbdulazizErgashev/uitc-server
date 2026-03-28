@@ -11,19 +11,38 @@ export class APIFeatures {
     const excludedFields = ["page", "limit", "sort"];
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    if (Object.keys(queryObj).length > 0) {
-      this.queryOptions.where = queryObj;
-    }
+    let where = {};
+
+    Object.keys(queryObj).forEach((key) => {
+      if (typeof queryObj[key] === "object") {
+        where[key] = {};
+        Object.keys(queryObj[key]).forEach((op) => {
+          if (["gte", "lte", "gt", "lt"].includes(op)) {
+            where[key][op] = Number(queryObj[key][op]);
+          }
+        });
+      } else {
+        where[key] = queryObj[key];
+      }
+    });
+
+    this.queryOptions.where = where;
 
     return this;
   }
 
   sort() {
     if (this.queryString.sort) {
-      this.queryOptions.orderBy = {
-        [this.queryString.sort]: "asc",
-      };
+      const fields = this.queryString.sort.split(",");
+
+      this.queryOptions.orderBy = fields.map((field) => {
+        if (field.startsWith("-")) {
+          return { [field.substring(1)]: "desc" };
+        }
+        return { [field]: "asc" };
+      });
     }
+
     return this;
   }
 
@@ -37,7 +56,20 @@ export class APIFeatures {
     return this;
   }
 
-  async execute() {
-    return await this.model.findMany(this.queryOptions);
+  // async execute() {
+  //   return await this.model.findMany(this.queryOptions);
+  // }
+  async executeWithCount() {
+    const where = this.queryOptions.where || {};
+
+    const [data, total] = await Promise.all([
+      this.model.findMany(this.queryOptions),
+      this.model.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+    };
   }
 }
