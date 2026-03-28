@@ -1,3 +1,4 @@
+// index.js
 import app from "./app.js";
 import dotenv from "dotenv";
 import { prisma } from "../prisma/prisma.js";
