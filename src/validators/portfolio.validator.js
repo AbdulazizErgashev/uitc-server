@@ -19,7 +19,6 @@ export const createPortfolioSchema = z.object({
   platform: z.string().optional(),
   url: z.string().url().optional(),
   tags: z.array(z.string()).optional(),
-  is_public: z.boolean().optional(),
 });
 
 export const updatePortfolioSchema = createPortfolioSchema.partial();
