@@ -30,8 +30,6 @@ export const createTestimonialSchema = z
 
     rating: z.number().int("Rating must be integer").min(0).max(5),
 
-    video_url: z.string().url("Invalid video URL").optional(),
-
     tags: z.array(z.string().trim()).max(10).optional(),
 
     featured: z.boolean().optional(),
@@ -54,8 +52,6 @@ export const updateTestimonialSchema = z
     long_quote: z.string().trim().max(2000).optional(),
 
     rating: z.number().int().min(0).max(5).optional(),
-
-    video_url: z.string().url().optional(),
 
     tags: z.array(z.string().trim()).max(10).optional(),
 

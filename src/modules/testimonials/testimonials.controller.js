@@ -1,6 +1,7 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { successResponse } from "../../utils/apiResponse.js";
 import { APIFeatures } from "../../utils/apiFeatures.js";
+import { uploadToS3 } from "../../utils/s3.js";
 import {
   getTestimonialsService,
   getTestimonialByIdService,
@@ -52,16 +53,30 @@ export const getTestimonial = asyncHandler(async (req, res) => {
 });
 
 export const createTestimonial = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "Video file is required" });
+  }
+  const fileName = `testimonials/${Date.now()}-${req.file.originalname}`;
+  const { url } = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
   const testimonial = await createTestimonialService({
     ...req.body,
     user_id: req.user.id,
     date: new Date(),
+    video_url: url,
   });
   successResponse(res, testimonial, "Testimonial created successfully");
 });
 
 export const updateTestimonial = asyncHandler(async (req, res) => {
-  const testimonial = await updateTestimonialService(req.params.id, req.body);
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "Video file is required" });
+  }
+  const fileName = `testimonials/${Date.now()}-${req.file.originalname}`;
+  const { url } = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+  const testimonial = await updateTestimonialService(req.params.id, {
+    ...req.body,
+    video_url: url,
+  });
   successResponse(res, testimonial, "Testimonial updated successfully");
 });
 

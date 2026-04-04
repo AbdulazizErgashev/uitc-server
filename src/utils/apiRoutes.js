@@ -1,7 +1,6 @@
 import express from "express";
 
 import authRoutes from "../modules/auth/auth.route.js";
-import usersRoutes from "../modules/users/users.route.js";
 import coursesRoutes from "../modules/courses/courses.route.js";
 import companiesRoutes from "../modules/companies/companies.route.js";
 import testimonialsRoutes from "../modules/testimonials/testimonials.route.js";
@@ -12,7 +11,6 @@ import teamMembersRoutes from "../modules/teamMembers/teamMembers.route.js";
 const router = express.Router();
 
 router.use("/auth", authRoutes);
-router.use("/users", usersRoutes);
 router.use("/courses", coursesRoutes);
 router.use("/companies", companiesRoutes);
 router.use("/testimonials", testimonialsRoutes);

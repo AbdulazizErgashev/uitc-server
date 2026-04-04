@@ -7,6 +7,7 @@ import {
   updatePortfolioService,
   deletePortfolioService,
 } from "./portfolio.service.js";
+import { uploadToS3 } from "../../utils/s3.js";
 
 export const getPortfolios = asyncHandler(async (req, res) => {
   const portfolios = await getAllPortfolios();
@@ -19,12 +20,24 @@ export const getPortfolio = asyncHandler(async (req, res) => {
 });
 
 export const createPortfolio = asyncHandler(async (req, res) => {
-  const portfolio = await createPortfolioService(req.body);
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "Media file is required" });
+  }
+  const fileName = `portfolio/${Date.now()}-${req.file.originalname}`;
+  const { url } = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+  const data = { ...req.body, media_url: url };
+  const portfolio = await createPortfolioService(data);
   return successResponse(res, portfolio, "Portfolio created successfully");
 });
 
 export const updatePortfolio = asyncHandler(async (req, res) => {
-  const portfolio = await updatePortfolioService(req.params.id, req.body);
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "Media file is required" });
+  }
+  const fileName = `portfolio/${Date.now()}-${req.file.originalname}`;
+  const { url } = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+  const data = { ...req.body, media_url: url };
+  const portfolio = await updatePortfolioService(req.params.id, data);
   return successResponse(res, portfolio, "Portfolio updated successfully");
 });
 

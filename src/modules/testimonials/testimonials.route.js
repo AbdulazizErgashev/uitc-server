@@ -24,8 +24,10 @@ import {
   addCommentSchema,
   idParamSchema,
 } from "../../validators/testimonials.validator.js";
+import multer from "multer";
 
 const router = express.Router();
+const upload = multer();
 
 router.get("/", getTestimonials);
 router.get("/featured", getFeatured);
@@ -37,9 +39,10 @@ router.get("/:id", validate(idParamSchema, "params"), getTestimonial);
 
 router.use(authMiddleware);
 
-router.post("/", validate(createTestimonialSchema), createTestimonial);
+router.post("/", upload.single("video"), validate(createTestimonialSchema), createTestimonial);
 router.patch(
   "/:id",
+  upload.single("video"),
   validate(idParamSchema, "params"),
   validate(updateTestimonialSchema),
   updateTestimonial,

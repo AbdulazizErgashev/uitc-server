@@ -19,8 +19,6 @@ export const createCompanySchema = z
       .regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid hex color")
       .optional(),
 
-    logo_url: z.string().url("Invalid logo URL").optional(),
-
     website: z.string().url("Invalid website URL").optional(),
 
     description: z.string().trim().max(1000).optional(),
@@ -36,8 +34,6 @@ export const updateCompanySchema = z
       .string()
       .regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid hex color")
       .optional(),
-
-    logo_url: z.string().url().optional(),
 
     website: z.string().url().optional(),
 

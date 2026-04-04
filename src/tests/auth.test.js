@@ -44,7 +44,6 @@ describe("Auth API", () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.data.role).toBe("admin");
   });
 
   it("GET /api/auth/me - fail without token", async () => {

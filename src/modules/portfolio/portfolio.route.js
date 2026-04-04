@@ -13,16 +13,18 @@ import {
   updatePortfolioSchema,
   idParamSchema,
 } from "../../validators/portfolio.validator.js";
+import multer from "multer";
 
 const router = express.Router();
+const upload = multer();
 
 router.get("/", getPortfolios);
 router.get("/:id", validate(idParamSchema, "params"), getPortfolio);
 
 router.use(authMiddleware);
 
-router.post("/", validate(createPortfolioSchema), createPortfolio);
-router.patch("/:id", validate(idParamSchema, "params"), validate(updatePortfolioSchema), updatePortfolio);
+router.post("/", upload.single("media"), validate(createPortfolioSchema), createPortfolio);
+router.patch("/:id", upload.single("media"), validate(idParamSchema, "params"), validate(updatePortfolioSchema), updatePortfolio);
 router.delete("/:id", validate(idParamSchema, "params"), deletePortfolio);
 
 export default router;

@@ -7,6 +7,7 @@ import {
   updateTeamMemberService,
   deleteTeamMemberService,
 } from "./teamMembers.service.js";
+import { uploadToS3 } from "../../utils/s3.js";
 
 export const getTeamMembers = asyncHandler(async (req, res) => {
   const members = await getAllTeamMembers();
@@ -19,12 +20,24 @@ export const getTeamMember = asyncHandler(async (req, res) => {
 });
 
 export const createTeamMember = asyncHandler(async (req, res) => {
-  const member = await createTeamMemberService(req.body);
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "Image file is required" });
+  }
+  const fileName = `team-members/${Date.now()}-${req.file.originalname}`;
+  const { url } = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+  const data = { ...req.body, image: url };
+  const member = await createTeamMemberService(data);
   successResponse(res, member, "Team member created successfully");
 });
 
 export const updateTeamMember = asyncHandler(async (req, res) => {
-  const member = await updateTeamMemberService(req.params.id, req.body);
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "Image file is required" });
+  }
+  const fileName = `team-members/${Date.now()}-${req.file.originalname}`;
+  const { url } = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+  const data = { ...req.body, image: url };
+  const member = await updateTeamMemberService(req.params.id, data);
   successResponse(res, member, "Team member updated successfully");
 });
 

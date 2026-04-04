@@ -14,7 +14,7 @@ export const createCourseSchema = z
 
     description: z.string().trim().max(1000).optional(),
 
-    duration: z.number().int().positive().optional(),
+    duration: z.string().optional(),
   })
   .strict();
 

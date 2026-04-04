@@ -15,17 +15,20 @@ import {
   updateCompanySchema,
   idParamSchema,
 } from "../../validators/companies.validator.js";
+import multer from "multer";
 
 const router = express.Router();
+const upload = multer();
 
 // Admin-only routes
 router.use(authMiddleware, adminMiddleware);
 
 router.get("/", getCompanies);
 router.get("/:id", validate(idParamSchema, "params"), getCompany);
-router.post("/", validate(createCompanySchema), createCompany);
+router.post("/", upload.single("logo"), validate(createCompanySchema), createCompany);
 router.patch(
   "/:id",
+  upload.single("logo"),
   validate(idParamSchema, "params"),
   validate(updateCompanySchema),
   updateCompany,

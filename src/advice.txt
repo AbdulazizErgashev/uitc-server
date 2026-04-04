@@ -48,3 +48,86 @@ PATCH /api/portfolio/:id – description ni o‘zgartirib ko‘r.
 GET /api/portfolio/:id – yangilangan qiymat qaytadimi.
 DELETE /api/portfolio/:id – o‘chirish.
 GET /api/portfolio/:id – 404 yoki not found tekshir.
+
+
+
+
+
+
+
+
+
+
+
+Quyidagi jadvalda backenddagi barcha endpointlarni (route'larni) to'liq ro'yxatini beraman. Barcha endpointlar /api prefiksi bilan boshlanadi (masalan, /api/auth/login). Men har bir modulni tekshirib, GET, POST, PATCH, DELETE so'rovlar uchun mavjud endpointlarni aniqladim.
+
+Endpointlar quyidagi guruhlarga bo'lingan:
+
+Public: Autentifikatsiyasiz ishlaydi.
+Authenticated: Token (Bearer) talab qiladi.
+Admin-only: Faqat admin roli bilan ishlaydi (authenticated + admin middleware).
+Agar GET so'rovlar 401 qaytaryotgan bo'lsa, ehtimol admin panel token yubormayotgan yoki token noto'g'ri. Admin panelda barcha so'rovlar uchun Authorization: Bearer <token> header qo'shing.
+
+Auth Module (/api/auth)
+Method	Endpoint	Access	Description
+POST	/api/auth/register	Public	Admin ro'yxatdan o'tkazish (faqat birinchi marta, agar admin yo'q bo'lsa)
+POST	/api/auth/login	Public	Admin login
+GET	/api/auth/me	Authenticated	Joriy foydalanuvchi profili
+PATCH	/api/auth/update	Authenticated	Telefon va parolni yangilash
+POST	/api/auth/logout	Authenticated	Logout
+Users Module (/api/users) - Admin-only
+Method	Endpoint	Access	Description
+GET	/api/users/	Admin	Barcha foydalanuvchilarni olish
+GET	/api/users/:id	Admin	Bitta foydalanuvchini olish
+PATCH	/api/users/:id	Admin	Foydalanuvchini yangilash
+DELETE	/api/users/:id	Admin	Foydalanuvchini o'chirish
+Courses Module (/api/courses)
+Method	Endpoint	Access	Description
+GET	/api/courses/	Public	Barcha kurslarni olish
+GET	/api/courses/:id	Public	Bitta kursni olish
+POST	/api/courses/	Admin	Kurs yaratish
+PATCH	/api/courses/:id	Admin	Kursni yangilash
+DELETE	/api/courses/:id	Admin	Kursni o'chirish
+Companies Module (/api/companies) - Admin-only
+Method	Endpoint	Access	Description
+GET	/api/companies/	Admin	Barcha kompaniyalarni olish
+GET	/api/companies/:id	Admin	Bitta kompaniyani olish
+POST	/api/companies/	Admin	Kompaniya yaratish
+PATCH	/api/companies/:id	Admin	Kompaniyani yangilash
+DELETE	/api/companies/:id	Admin	Kompaniyani o'chirish
+Testimonials Module (/api/testimonials)
+Method	Endpoint	Access	Description
+GET	/api/testimonials/	Public	Barcha testimonial'larni olish
+GET	/api/testimonials/featured	Public	Featured testimonial'larni olish
+GET	/api/testimonials/stats	Public	Statistika
+GET	/api/testimonials/trending	Public	Trending testimonial'lar
+GET	/api/testimonials/top-rated	Public	Eng yuqori baholanganlar
+GET	/api/testimonials/tag	Public	Teg bo'yicha testimonial'lar
+GET	/api/testimonials/:id	Public	Bitta testimonial
+POST	/api/testimonials/	Authenticated	Testimonial yaratish
+PATCH	/api/testimonials/:id	Authenticated	Testimonial yangilash
+DELETE	/api/testimonials/:id	Authenticated	Testimonial o'chirish
+POST	/api/testimonials/:id/like	Authenticated	Like qo'yish
+POST	/api/testimonials/:id/bookmark	Authenticated	Bookmark qilish
+POST	/api/testimonials/:id/comment	Authenticated	Komment qo'shish
+Upload Module (/api/upload) - Admin-only
+Method	Endpoint	Access	Description
+POST	/api/upload/	Admin	Fayl yuklash (multer orqali)
+Portfolio Module (/api/portfolio)
+Method	Endpoint	Access	Description
+GET	/api/portfolio/	Public	Barcha portfolio'larni olish
+GET	/api/portfolio/:id	Public	Bitta portfolio
+POST	/api/portfolio/	Authenticated	Portfolio yaratish
+PATCH	/api/portfolio/:id	Authenticated	Portfolio yangilash
+DELETE	/api/portfolio/:id	Authenticated	Portfolio o'chirish
+Team Members Module (/api/team-members)
+Method	Endpoint	Access	Description
+GET	/api/team-members/	Public	Barcha jamoa a'zolarini olish
+GET	/api/team-members/:id	Public	Bitta jamoa a'zosini olish
+POST	/api/team-members/	Admin	Jamoa a'zosini yaratish
+PATCH	/api/team-members/:id	Admin	Jamoa a'zosini yangilash
+DELETE	/api/team-members/:id	Admin	Jamoa a'zosini o'chirish
+Qo'shimcha Endpointlar
+GET / - API ishlayotganligini tekshirish
+GET /health - Health check
+Agar 401 xatoligi davom etsa, tokenni to'g'ri yuborayotganingizni tekshiring. Admin panelda login qilib token oling va barcha so'rovlar uchun header qo'shing. Agar teacher/student rollari kerak bo'lmasa, kodda ular yo'q, faqat admin mavjud

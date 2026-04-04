@@ -14,16 +14,18 @@ import {
   updateTeamMemberSchema,
   idParamSchema,
 } from "../../validators/teamMembers.validator.js";
+import multer from "multer";
 
 const router = express.Router();
+const upload = multer();
 
 router.get("/", getTeamMembers);
 router.get("/:id", validate(idParamSchema, "params"), getTeamMember);
 
 router.use(authMiddleware, adminMiddleware);
 
-router.post("/", validate(createTeamMemberSchema), createTeamMember);
-router.patch("/:id", validate(idParamSchema, "params"), validate(updateTeamMemberSchema), updateTeamMember);
+router.post("/", upload.single("image"), validate(createTeamMemberSchema), createTeamMember);
+router.patch("/:id", upload.single("image"), validate(idParamSchema, "params"), validate(updateTeamMemberSchema), updateTeamMember);
 router.delete("/:id", validate(idParamSchema, "params"), deleteTeamMember);
 
 export default router;
