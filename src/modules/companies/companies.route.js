@@ -1,3 +1,4 @@
+// src/modules/companies/companies.routes.js
 import express from "express";
 import {
   getCompanies,
@@ -15,23 +16,26 @@ import {
   updateCompanySchema,
   idParamSchema,
 } from "../../validators/companies.validator.js";
-import multer from "multer";
+import { upload } from "../../utils/multer.js"; // memoryStorage bilan fayl upload
 
 const router = express.Router();
-const upload = multer(); // memoryStorage bilan
 
-// Admin faqatgina
+// Barcha route-larga admin check qo‘yiladi
 router.use(authMiddleware, adminMiddleware);
 
 // CRUD routes
 router.get("/", getCompanies);
 router.get("/:id", validate(idParamSchema, "params"), getCompany);
+
+// CREATE
 router.post(
   "/",
-  upload.single("logo"),
-  validate(createCompanySchema),
+  upload.single("logo"), // fayl upload
+  validate(createCompanySchema), // body validation
   createCompany,
 );
+
+// UPDATE
 router.patch(
   "/:id",
   upload.single("logo"),
@@ -39,6 +43,8 @@ router.patch(
   validate(updateCompanySchema),
   updateCompany,
 );
+
+// DELETE
 router.delete("/:id", validate(idParamSchema, "params"), deleteCompany);
 
 export default router;

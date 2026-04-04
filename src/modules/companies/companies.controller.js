@@ -9,6 +9,8 @@ import {
   deleteCompanyService,
 } from "./companies.service.js";
 import { uploadToLocal } from "../../utils/uploadLocal.js";
+import fs from "fs";
+import path from "path";
 
 // GET all companies
 export const getCompanies = asyncHandler(async (req, res) => {
@@ -30,10 +32,18 @@ export const createCompany = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Logo file is required" });
   }
 
-  const fileName = `companies/${Date.now()}-${req.file.originalname}`;
-  const { url } = await uploadToLocal(req.file.buffer, fileName);
+  // Faylni images/companies papkaga saqlash
+  const fileDir = path.join(process.cwd(), "images", "companies");
+  if (!fs.existsSync(fileDir)) fs.mkdirSync(fileDir, { recursive: true });
 
-  const data = { ...req.body, logo_url: url };
+  const fileName = `${Date.now()}-${req.file.originalname}`;
+  const filePath = path.join(fileDir, fileName);
+
+  await fs.promises.writeFile(filePath, req.file.buffer);
+
+  const logo_url = `/images/companies/${fileName}`; // frontendda ishlatish uchun URL
+
+  const data = { ...req.body, logo_url };
   const company = await createCompanyService(data);
 
   successResponse(res, company, "Company created successfully");
@@ -44,9 +54,15 @@ export const updateCompany = asyncHandler(async (req, res) => {
   let data = { ...req.body };
 
   if (req.file) {
-    const fileName = `companies/${Date.now()}-${req.file.originalname}`;
-    const { url } = await uploadToLocal(req.file.buffer, fileName);
-    data.logo_url = url;
+    // Faylni images/companies papkaga saqlash
+    const fileDir = path.join(process.cwd(), "images", "companies");
+    if (!fs.existsSync(fileDir)) fs.mkdirSync(fileDir, { recursive: true });
+
+    const fileName = `${Date.now()}-${req.file.originalname}`;
+    const filePath = path.join(fileDir, fileName);
+
+    await fs.promises.writeFile(filePath, req.file.buffer);
+    data.logo_url = `/images/companies/${fileName}`;
   }
 
   const company = await updateCompanyService(req.params.id, data);
