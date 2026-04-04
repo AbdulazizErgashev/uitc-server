@@ -1,10 +1,15 @@
+// index.js
 import app from "./app.js";
 import dotenv from "dotenv";
 import { prisma } from "../prisma/prisma.js";
+import path from "path";
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5050;
+
+// ✅ images papkasini static qilish
+app.use("/images", express.static(path.join(process.cwd(), "images")));
 
 async function start() {
   try {

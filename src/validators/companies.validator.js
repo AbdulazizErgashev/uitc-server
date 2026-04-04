@@ -30,10 +30,10 @@ export const updateCompanySchema = z
   .object({
     name: z.string().trim().min(2).max(100).optional(),
 
-    color: z
-      .string()
-      .regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid hex color")
-      .optional(),
+    // color: z
+    //   .string()
+    //   .regex(/^(#([0-9A-F]{3}){1,2}|[a-zA-Z]+)$/, "Invalid color")
+    //   .optional(),
 
     website: z.string().url().optional(),
 

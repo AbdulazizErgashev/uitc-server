@@ -10,6 +10,7 @@ import teamMembersRoutes from "../modules/teamMembers/teamMembers.route.js";
 
 const router = express.Router();
 
+// Modul routelarni ulaymiz
 router.use("/auth", authRoutes);
 router.use("/courses", coursesRoutes);
 router.use("/companies", companiesRoutes);

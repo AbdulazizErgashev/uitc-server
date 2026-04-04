@@ -33,10 +33,8 @@ describe("Companies API", () => {
     const res = await request(app)
       .post("/api/companies")
       .set("Authorization", `Bearer ${token}`)
-      .send({
-        name: "Test Company",
-        logo_url: "https://via.placeholder.com/150",
-      });
+      .attach("logo", "tests/test-image.png")
+      .field("name", "Test Company");
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);

@@ -18,14 +18,20 @@ import {
 import multer from "multer";
 
 const router = express.Router();
-const upload = multer();
+const upload = multer(); // memoryStorage bilan
 
-// Admin-only routes
+// Admin faqatgina
 router.use(authMiddleware, adminMiddleware);
 
+// CRUD routes
 router.get("/", getCompanies);
 router.get("/:id", validate(idParamSchema, "params"), getCompany);
-router.post("/", upload.single("logo"), validate(createCompanySchema), createCompany);
+router.post(
+  "/",
+  upload.single("logo"),
+  validate(createCompanySchema),
+  createCompany,
+);
 router.patch(
   "/:id",
   upload.single("logo"),
