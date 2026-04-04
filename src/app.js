@@ -1,3 +1,4 @@
+// src/app.js
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -5,7 +6,6 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 
 import ApiRoutes from "./utils/apiRoutes.js";
-
 import { errorHandler } from "./middlewares/error.js";
 import { swaggerDocs } from "./utils/swagger.js";
 
@@ -22,6 +22,7 @@ app.use(morgan("dev"));
 // Routes
 app.use("/api", ApiRoutes);
 
+// Swagger
 swaggerDocs(app);
 
 // Health & root
