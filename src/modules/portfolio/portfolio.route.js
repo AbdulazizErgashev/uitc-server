@@ -23,8 +23,19 @@ router.get("/:id", validate(idParamSchema, "params"), getPortfolio);
 
 router.use(authMiddleware);
 
-router.post("/", upload.single("media"), validate(createPortfolioSchema), createPortfolio);
-router.patch("/:id", upload.single("media"), validate(idParamSchema, "params"), validate(updatePortfolioSchema), updatePortfolio);
+router.post(
+  "/",
+  upload.single("media"),
+  validate(createPortfolioSchema),
+  createPortfolio,
+);
+router.patch(
+  "/:id",
+  upload.single("media"),
+  validate(idParamSchema, "params"),
+  validate(updatePortfolioSchema),
+  updatePortfolio,
+);
 router.delete("/:id", validate(idParamSchema, "params"), deletePortfolio);
 
 export default router;

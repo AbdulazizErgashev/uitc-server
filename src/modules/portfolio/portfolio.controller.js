@@ -1,4 +1,3 @@
-// src/modules/portfolio/portfolio.controller.js
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { successResponse } from "../../utils/apiResponse.js";
 import {
@@ -8,7 +7,7 @@ import {
   updatePortfolioService,
   deletePortfolioService,
 } from "./portfolio.service.js";
-import { uploadToLocal } from "../../utils/uploadLocal.js"; // AWS o‘rniga local
+import { uploadToLocal } from "../../utils/uploadLocal.js";
 
 // GET all portfolios
 export const getPortfolios = asyncHandler(async (req, res) => {
@@ -28,32 +27,38 @@ export const getPortfolio = asyncHandler(async (req, res) => {
 
 // CREATE portfolio
 export const createPortfolio = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Media file is required" });
+  let mediaUrl = null;
+  if (req.file) {
+    const fileName = `portfolio/${Date.now()}-${req.file.originalname}`;
+    const { url } = await uploadToLocal(req.file.buffer, fileName);
+    mediaUrl = url;
   }
-  const fileName = `portfolio/${Date.now()}-${req.file.originalname}`;
-  const { url } = await uploadToLocal(req.file.buffer, fileName);
 
-  const data = { ...req.body, media_url: url };
+  const data = {
+    ...req.body,
+    media_url: mediaUrl,
+  };
+
   const portfolio = await createPortfolioService(data);
   return successResponse(res, portfolio, "Portfolio created successfully");
 });
 
 // UPDATE portfolio
 export const updatePortfolio = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Media file is required" });
+  let mediaUrl = null;
+  if (req.file) {
+    const fileName = `portfolio/${Date.now()}-${req.file.originalname}`;
+    const { url } = await uploadToLocal(req.file.buffer, fileName);
+    mediaUrl = url;
   }
-  const fileName = `portfolio/${Date.now()}-${req.file.originalname}`;
-  const { url } = await uploadToLocal(req.file.buffer, fileName);
 
-  const data = { ...req.body, media_url: url };
-  const portfolio = await updatePortfolioService(req.params.id, data);
-  return successResponse(res, portfolio, "Portfolio updated successfully");
+  const data = {
+    ...req.body,
+    ...(mediaUrl && { media_url: mediaUrl }),
+  };
+
+  const updated = await updatePortfolioService(req.params.id, data);
+  return successResponse(res, updated, "Portfolio updated successfully");
 });
 
 // DELETE portfolio
