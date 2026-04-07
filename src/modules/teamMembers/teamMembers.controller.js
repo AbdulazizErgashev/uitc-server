@@ -1,4 +1,3 @@
-// src/modules/teamMembers/teamMembers.controller.js
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { successResponse } from "../../utils/apiResponse.js";
 import {
@@ -8,52 +7,58 @@ import {
   updateTeamMemberService,
   deleteTeamMemberService,
 } from "./teamMembers.service.js";
-import { uploadToLocal } from "../../utils/uploadLocal.js"; // AWS o‘rniga local
 
-// GET all team members
+/**
+ * JSON parse helper: expertise & achievements
+ */
+const parseJSONFields = (body) => {
+  ["expertise", "achievements"].forEach((field) => {
+    if (body[field] && typeof body[field] === "string") {
+      try {
+        body[field] = JSON.parse(body[field]);
+      } catch {
+        body[field] = [];
+      }
+    }
+  });
+};
+
+// GET all
 export const getTeamMembers = asyncHandler(async (req, res) => {
   const members = await getAllTeamMembers();
   successResponse(res, members, "Team members fetched successfully");
 });
 
-// GET single team member
+// GET one
 export const getTeamMember = asyncHandler(async (req, res) => {
   const member = await getTeamMemberById(req.params.id);
   successResponse(res, member, "Team member fetched successfully");
 });
 
-// CREATE team member
+// CREATE
 export const createTeamMember = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Image file is required" });
-  }
-  const fileName = `team-members/${Date.now()}-${req.file.originalname}`;
-  const { url } = await uploadToLocal(req.file.buffer, fileName);
+  parseJSONFields(req.body);
 
-  const data = { ...req.body, image: url };
-  const member = await createTeamMemberService(data);
+  const member = await createTeamMemberService(req.body, req.file);
+
   successResponse(res, member, "Team member created successfully");
 });
 
-// UPDATE team member
+// UPDATE
 export const updateTeamMember = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Image file is required" });
-  }
-  const fileName = `team-members/${Date.now()}-${req.file.originalname}`;
-  const { url } = await uploadToLocal(req.file.buffer, fileName);
+  parseJSONFields(req.body);
 
-  const data = { ...req.body, image: url };
-  const member = await updateTeamMemberService(req.params.id, data);
+  const member = await updateTeamMemberService(
+    req.params.id,
+    req.body,
+    req.file,
+  );
+
   successResponse(res, member, "Team member updated successfully");
 });
 
-// DELETE team member
+// DELETE
 export const deleteTeamMember = asyncHandler(async (req, res) => {
   await deleteTeamMemberService(req.params.id);
-  successResponse(res, null, "Team member deleted successfully");
+  res.status(204).send();
 });
